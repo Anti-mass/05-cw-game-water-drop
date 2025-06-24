@@ -76,6 +76,7 @@ function endGame() {
   let messages, msg;
   if (score >= 12) {
     messages = winningMessages;
+    launchConfetti();
   } else {
     messages = losingMessages;
   }
@@ -86,6 +87,58 @@ function endGame() {
     const modal = document.getElementById('cw-modal');
     if (modal) modal.style.display = 'flex';
   }, 900);
+}
+
+// Confetti effect for win
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  const container = document.getElementById('game-container');
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+  canvas.style.display = 'block';
+  canvas.style.left = container.offsetLeft + 'px';
+  canvas.style.top = container.offsetTop + 'px';
+  const ctx = canvas.getContext('2d');
+  const confettiCount = 120;
+  const confetti = [];
+  for (let i = 0; i < confettiCount; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * confettiCount,
+      color: `hsl(${Math.random()*360},90%,60%)`,
+      tilt: Math.random() * 10 - 10
+    });
+  }
+  let angle = 0;
+  let frame = 0;
+  function drawConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    for (let i = 0; i < confettiCount; i++) {
+      let c = confetti[i];
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2, false);
+      ctx.fillStyle = c.color;
+      ctx.fill();
+      c.y += (Math.cos(angle + c.d) + 2 + c.r/2) * 0.9;
+      c.x += Math.sin(angle) * 2;
+      c.tilt = Math.sin(angle + i) * 15;
+      if (c.y > canvas.height) {
+        c.x = Math.random() * canvas.width;
+        c.y = Math.random() * -20;
+      }
+    }
+    frame++;
+    if (frame < 70) {
+      requestAnimationFrame(drawConfetti);
+    } else {
+      canvas.style.display = 'none';
+    }
+  }
+  drawConfetti();
 }
 
 // Modal close logic
